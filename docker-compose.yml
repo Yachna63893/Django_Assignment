@@ -1,0 +1,42 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: healthcare_db_container
+    restart: always
+    environment:
+      POSTGRES_DB: healthcare_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  web:
+    build: .
+    container_name: healthcare_web_container
+    restart: always
+    command: >
+      sh -c "python manage.py migrate &&
+             python manage.py seed_data &&
+             gunicorn --bind 0.0.0.0:8000 --workers 3 healthcare_project.wsgi:application"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=False
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-change-this-in-production}
+      - ALLOWED_HOSTS=localhost,127.0.0.1,web
+      - DB_NAME=healthcare_db
+      - DB_USER=postgres
+      - DB_PASSWORD=${DB_PASSWORD:-postgres}
+      - DB_HOST=db
+      - DB_PORT=5432
+      - ACCESS_TOKEN_LIFETIME_MINUTES=60
+      - REFRESH_TOKEN_LIFETIME_DAYS=7
+    depends_on:
+      - db
+
+volumes:
+  postgres_data:

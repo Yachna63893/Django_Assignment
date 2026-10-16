@@ -1,0 +1,506 @@
+{
+	"info": {
+		"_postman_id": "healthcare-backend-api-v1",
+		"name": "Healthcare Backend APIs",
+		"description": "Postman collection for Healthcare Application Backend built with Django, DRF, PostgreSQL, and SimpleJWT.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://127.0.0.1:8000",
+			"type": "string"
+		},
+		{
+			"key": "jwt_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "refresh_token",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "patient_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "doctor_id",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "mapping_id",
+			"value": "1",
+			"type": "string"
+		}
+	],
+	"item": [
+		{
+			"name": "1. Authentication",
+			"item": [
+				{
+					"name": "Register User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.tokens && jsonData.tokens.access) {",
+									"    pm.collectionVariables.set('jwt_token', jsonData.tokens.access);",
+									"    pm.collectionVariables.set('refresh_token', jsonData.tokens.refresh);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Nurse Jackie\",\n    \"email\": \"nurse.jackie@healthcare.test\",\n    \"password\": \"Password@12345\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/register/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "register", ""]
+						}
+					}
+				},
+				{
+					"name": "Login User (Get JWT)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access) {",
+									"    pm.collectionVariables.set('jwt_token', jsonData.access);",
+									"    pm.collectionVariables.set('refresh_token', jsonData.refresh);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"staff@healthcare.test\",\n    \"password\": \"Staff@12345\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login", ""]
+						}
+					}
+				},
+				{
+					"name": "Refresh Access Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.access) {",
+									"    pm.collectionVariables.set('jwt_token', jsonData.access);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"refresh\": \"{{refresh_token}}\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/token/refresh/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "token", "refresh", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Authenticated User Profile",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/profile/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "profile", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Patient Management",
+			"item": [
+				{
+					"name": "Add Patient",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set('patient_id', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Bruce Banner\",\n    \"age\": 42,\n    \"gender\": \"Male\",\n    \"contact_number\": \"+1-555-0811\",\n    \"email\": \"banner@avengers.test\",\n    \"address\": \"Culver University Lab\",\n    \"medical_history\": \"High stress induced physical transformations; gamma radiation exposure.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients", ""]
+						}
+					}
+				},
+				{
+					"name": "Get User's Patients",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patients/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Patient by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients", "{{patient_id}}", ""]
+						}
+					}
+				},
+				{
+					"name": "Update Patient",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Dr. Bruce Banner (PhD)\",\n    \"age\": 43,\n    \"gender\": \"Male\",\n    \"contact_number\": \"+1-555-0811\",\n    \"email\": \"banner@avengers.test\",\n    \"address\": \"Stark Tower, New York\",\n    \"medical_history\": \"Gamma therapy completed. Pulse regularized.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients", "{{patient_id}}", ""]
+						}
+					}
+				},
+				{
+					"name": "Delete Patient",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/patients/{{patient_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients", "{{patient_id}}", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Doctor Management",
+			"item": [
+				{
+					"name": "Add Doctor",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set('doctor_id', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Dr. Stephen Strange\",\n    \"specialization\": \"Neuro-Surgery\",\n    \"contact_number\": \"+1-555-0777\",\n    \"email\": \"strange@kamartaj.test\",\n    \"experience_years\": 16,\n    \"hospital_affiliation\": \"Metro-General Hospital\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctors/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctors", ""]
+						}
+					}
+				},
+				{
+					"name": "Get All Doctors",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctors", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Doctor by ID",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/{{doctor_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctors", "{{doctor_id}}", ""]
+						}
+					}
+				},
+				{
+					"name": "Update Doctor",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Dr. Stephen Vincent Strange\",\n    \"specialization\": \"Chief Neurosurgeon & Mystic Arts\",\n    \"contact_number\": \"+1-555-0777\",\n    \"email\": \"strange@kamartaj.test\",\n    \"experience_years\": 18,\n    \"hospital_affiliation\": \"Sanctum Medical Center\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/doctors/{{doctor_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctors", "{{doctor_id}}", ""]
+						}
+					}
+				},
+				{
+					"name": "Delete Doctor",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/doctors/{{doctor_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "doctors", "{{doctor_id}}", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Patient-Doctor Mappings",
+			"item": [
+				{
+					"name": "Assign Doctor to Patient",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = pm.response.json();",
+									"if (jsonData.id) {",
+									"    pm.collectionVariables.set('mapping_id', jsonData.id);",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patient_id\": 1,\n    \"doctor_id\": 2,\n    \"notes\": \"Assigned for specialized clinical evaluation and care plan.\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/mappings/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mappings", ""]
+						}
+					}
+				},
+				{
+					"name": "Get All Mappings",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mappings/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mappings", ""]
+						}
+					}
+				},
+				{
+					"name": "Get Doctors Assigned to Patient (by Patient ID)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mappings/1/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mappings", "1", ""]
+						}
+					}
+				},
+				{
+					"name": "Remove Doctor from Patient (by Mapping ID)",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{jwt_token}}"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/mappings/{{mapping_id}}/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "mappings", "{{mapping_id}}", ""]
+						}
+					}
+				}
+			]
+		}
+	]
+}
