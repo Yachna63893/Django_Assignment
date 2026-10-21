@@ -99,7 +99,7 @@ Django_Assignment/
 
 ### 1. Clone & Navigate to Repository
 ```bash
-cd c:\Users\yachn\Documents\Django_Assignment
+cd c:\Documents\Django_Assignment
 ```
 
 ### 2. Activate Virtual Environment
